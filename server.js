@@ -9,7 +9,8 @@ var io = socketIO(server);
 
 var gameVersion = 'Версия игры: 1.0.0 alpha'
 
-app.set('port', 8080);
+var port = process.env.PORT || 8080;
+app.set('port', port);
 app.use('/', express.static(__dirname + '/game'));
 
 // Маршруты
@@ -18,8 +19,8 @@ app.get('/', function(request, response) {
 });
 
 // Запуск сервера
-server.listen(8080, function() {
-    console.log('Запускаю сервер на порте 8080');
+server.listen(port, function() {
+    console.log('Запускаю сервер на порте' + port);
 });
 
 var GAME = require ('./models/manch');
