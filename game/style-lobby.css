@@ -1,0 +1,305 @@
+body {
+	padding: 0;
+	margin: 0;
+	font-size: 18px;
+	font-family: sans-serif;
+}
+#bord, #lobby {
+	position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+#bord {
+	background-size: cover!important;
+}
+#lobby {
+	background: url(img/lobby1.jpg);
+	-webkit-background-size: cover;
+	background-size: cover;
+	background-attachment: fixed;
+	transition: all 2s;
+}
+.content {
+	width: 100%;
+	height: 100vh;
+	position: relative;
+}
+.behind {
+	margin-left: -3000px;
+}
+#main-table {
+	position: absolute;
+    width: 300px;
+    left: calc(50% - 181px);
+    text-align: center;
+    background: rgba(255,255,255,.9);
+    padding: 50px 30px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: all .5s;
+}
+#version {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	font-size: 12px;
+}
+#create-game {
+	margin-top: 40px;
+}
+.btn {
+	margin: 10px auto;
+    width: 100%;
+    padding: 15px 0;
+    font-size: 20px;
+    text-transform: uppercase;
+    background: #8cca4f;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    transition: all .5s;
+    color: #fff;
+    text-shadow: 1px 1px 3px #777;
+    cursor: pointer;
+}
+.btn:hover {
+	background: #7aaf46;
+}
+.btn-md {
+	max-width: 300px;
+}
+.hidden {
+	display: none;
+}
+table {
+	min-width: 100%;
+}
+#your-room-table {
+	min-width: auto;
+    width: 230px;
+    height: 100vh;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    padding-left: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+#your-room-table li {
+	background: #fff;
+	border-radius: 0 100px 100px 0;
+	margin-bottom: 15px;
+	display: flex;
+}
+#your-room-table img {
+	width: 80px;
+	height: 80px;
+	margin: 5px;
+}
+.pl-status {
+	font-size: 14px;
+	color: #c18b10;
+}
+
+/*========================*/
+#deck, #stock {
+	top: calc(50% - 75px);
+    left: 15px;
+    height: 150px;
+    width: 100px;
+    background: #ccc;
+    border: 2px solid #333;
+    font-size: 40px;
+    text-align: center;
+    line-height: 3.5;
+}
+
+#player_1 {
+	bottom: 15px;
+	left: calc(50% - 250px);
+	width: 500px;
+	height: 200px;
+}
+#opponents {
+	width: 90%;
+    height: auto;
+    left: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.opp-zone {
+	position: relative;
+	padding: 15px;
+    background: rgba(255,255,255,.8);
+    transition: all 1s;
+}
+.opp-zone p { margin-bottom: 5px 0; }
+.opp-card {
+	width: 15px;
+    height: 22px;
+    background: #555;
+    margin: 2px;
+    display: inline-block;
+}
+.opp-card:nth-child(1){
+	margin-left: 95px;
+}
+.col-1 { min-width: 300px; }
+.col-2 { width: calc(50% - 40px); }
+.col-3 { width: calc(33% - 40px); }
+.col-4 { width: calc(25% - 40px); }
+.col-5 { width: calc(20% - 40px); }
+
+.opp-zone.active {
+	background: #c18b10;
+	animation: eye 3s ease-in-out infinite;
+    -webkit-animation: eye 3s ease-in-out infinite;
+}
+
+#opponents .avatar {
+    width: 80px;
+    height: 80px;
+    background: #ccc;
+    float: left;
+    margin-right: 15px;
+}
+#opponents .cards-container {
+	display: flex;
+    flex-wrap: wrap;
+    border: 1px solid #ccc;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+.shirt {
+	background: #ccc;
+	border:10px solid #ccc;
+	width: 25px;
+    height: 40px;
+}
+.turn-mark {
+	position: absolute;
+    bottom: 120px;
+    right: -80px;
+    background: gray;
+    border: 2px solid #555;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+}
+.turn-mark.active {
+	background: #10c316;
+	border-color: #fff;
+	animation: eye 3s ease-in-out infinite;
+    -webkit-animation: eye 3s ease-in-out infinite;
+}
+
+.more {
+	position: absolute;
+	left: -150px;
+	width: 100px;
+	height: 50px;
+	top: calc(50% - 25px);
+}
+
+#kon {
+	top: calc(50% - 150px);
+	left: calc(50% - 200px);
+	height: 300px;
+	width: 400px;
+	overflow-x: hidden;
+}
+#kon .card {
+	margin: auto;
+    display: block;
+    width: 120px;
+    height: 170px;
+    padding: 0;
+    font-size: 75px;
+    position: absolute;
+    left: calc(50% - 60px);
+    line-height: 2.2;
+}
+
+#stock {
+	left: auto;
+	right: 15px;
+}
+
+.game_zone {
+	position: absolute;
+	padding: 15px;
+}
+
+.card {
+	width: 55px;
+    height: 75px;
+    background: #ccc;
+    text-align: center;
+    font-size: 45px;
+    display: inline-block;
+    margin: 10px;
+    color: #fff;
+    text-shadow: 1px 1px 1px #333;
+    padding-top: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#deck, .card, .opp-zone {
+	box-shadow: 3px 3px 20px #333;
+	border-radius: 5px;
+}
+
+.pink {background: #b74082;}
+.blue {background: #3379b5;}
+.green {background: #10c316;}
+.yellow {background: #c18b10;}
+
+.deck_img {
+	width: 100%;
+	background: aliceblue;
+	text-align: center;
+	font-size: 70px;
+	padding: 30px 0;
+	color: #ccc;
+}
+
+.inGameTip {
+	position: absolute;
+	bottom: 250px;
+	width: 100%;
+	text-align: center;
+	background: #fff;
+	padding: 10px 0;
+	color: red;
+	display: none;
+}
+
+#popTip {
+	position: absolute;
+	top: calc(50% - 50px);
+	width: 100%;
+	padding: 30px 0;
+	font-size: 40px;
+	text-transform: uppercase;
+	text-align: center;
+	background: #fff;
+	box-shadow: 0 0 25px 10px #fff;
+	display: none;
+}
+
+
+
+@keyframes eye {
+    0% { box-shadow: 0 0 10px #fff }   
+    50% { box-shadow: 0 0 50px #fff }
+    100% { box-shadow: 0 0 10px #fff }
+}
+@-webkit-keyframes eye {
+	0% { box-shadow: 0 0 10px #fff }   
+    50% { box-shadow: 0 0 50px #fff }
+    100% { box-shadow: 0 0 10px #fff }
+}

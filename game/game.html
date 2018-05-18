@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Atikus Game</title>
+
+	<link rel="stylesheet" href="game/style.css">
+</head>
+<body>
+	
+	<div id="bord">
+		<div id="deck" class="game_zone"></div>
+		<div id="player_1" class="game_zone">
+			<div class="score">0</div>
+			<button class="more" pl-data="1">взять карту</button>
+			<div class="cards-container" pl-data="1"></div>
+		</div>
+		<div id="player_2" class="game_zone">
+			<div class="score">0</div>
+			<div class="cards-container" pl-data="2"></div>
+		</div>
+		<div id="kon" class="game_zone"></div>
+		<!-- <div id="stock" class="game_zone"></div> -->
+
+		<div class="bottom-controlls">
+			<button id="start" class="bottom-controll-btn">начать игру</button>
+			<button id="next-turn" class="bottom-controll-btn">передать ход</button>
+		</div>
+	</div>
+
+	<script src="/socket.io/socket.io.js?x18050"></script>
+	<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+	<script src="game/game.js"></script>
+
+</body>
+</html>
