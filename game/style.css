@@ -1,0 +1,124 @@
+body {
+	padding: 0;
+	margin: 0;
+	color: #fff;
+	font-family: sans-serif;
+}
+
+#bord {
+	background: green;
+	height: calc(100vh - 30px);
+	border: 15px solid #ccc;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+#deck, #stock {
+	top: calc(50% - 75px);
+	left: 15px;
+	height: 150px;
+	width: 100px;
+}
+
+#player_1, #player_2 {
+	bottom: 15px;
+	left: calc(50% - 250px);
+	width: 500px;
+	height: 200px;
+}
+.score {
+	position: absolute;
+	bottom: 100px;
+	right: -50px;
+	background: red;
+	border: 2px solid #000;
+	height: calc(80px - 20px);
+	width: 80px;
+	color: #fff;
+	text-align: center;
+	font-size: 30px;
+	padding-top: 20px;
+}
+
+.more {
+	position: absolute;
+	left: -150px;
+	width: 100px;
+	height: 50px;
+	top: calc(50% - 25px);
+}
+
+#player_2 {
+	top: 15px;
+	bottom: auto;
+}
+
+#kon {
+	top: calc(50% - 150px);
+	left: calc(50% - 200px);
+	height: 300px;
+	width: 400px;
+	overflow-x: hidden;
+}
+#kon .card {
+	margin: auto;
+    display: block;
+    width: 120px;
+    padding: 50px 0;
+    font-size: 75px;
+    position: absolute;
+    left: calc(50% - 60px);
+}
+
+#stock {
+	left: auto;
+	right: 15px;
+}
+
+.game_zone {
+	position: absolute;
+	background: green;
+	padding: 15px;
+}
+
+.card {
+	width: 50px;
+	height: 75px;
+	background: #ccc;
+	text-align: center;
+	font-size: 45px;
+	display: inline-block;
+	margin: 10px;
+	color: #333;
+	padding-top: 20px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.pink {border:10px solid #b74082;}
+.blue {border:10px solid #3379b5;}
+
+.deck_img {
+	width: 100%;
+	background: aliceblue;
+	text-align: center;
+	font-size: 70px;
+	padding: 30px 0;
+	color: #ccc;
+}
+
+.bottom-controlls {
+	position: absolute;
+	bottom: 15px;
+	left: 15px;
+	width: calc(100% - 30px);
+	display: flex;
+}
+.bottom-controll-btn {
+	bottom: 15px;
+	padding: 5px;
+	width: 33.3%;
+	cursor: pointer;
+	background: #328c7b;
+	color: #fff;
+}

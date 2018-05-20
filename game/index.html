@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Atikus Game. Как подставить братюню.</title>
+	<link rel="shortcut icon" href="/favicon.jpg" type="image/jpeg">
+	<link rel="stylesheet" href="style-lobby.css">
+	<link rel="stylesheet" href="animate.css">
+</head>
+<body>
+	<!-- игровая доска -->
+	<div id="bord">
+		<div class="content">
+			<div id="deck" class="game_zone">0</div>
+
+			<div id="player_1" class="game_zone">
+				<div class="turn-mark animated"></div>
+				<div class="cards-container" pl-data="1"></div>
+			</div>
+
+			<div id="opponents" class="game_zone">
+			</div>
+
+			<div id="kon" class="game_zone"></div>
+
+			<!-- <div id="stock" class="game_zone"></div> -->
+
+			<div id="popTip">
+				<span></span><br>
+				<button id="exit" class="btn btn-md">Выход</button>
+			</div>
+
+		</div>
+	</div>
+
+	
+	<!-- интерфейс лобби -->
+	<div id="lobby">
+		<div class="content">
+			<div id="main-table">
+				<div id="version"></div>
+				<p id="server-status">ожидание подключения</p>
+
+				<table>
+					<tr>
+						<td id="pl-online"></td>
+					</tr>
+					<tr>
+						<td id="free"></td>
+					</tr>
+					<tr>
+						<td id="rooms"></td>
+					</tr>
+				</table>
+				
+				<button id="create-game" class="btn" create-data="online">Создать игру</button>
+				<button id="join-game" class="btn" join-data="online">Найти игру</button>
+
+				<button id="start-game" class="btn hidden">Старт</button>
+			</div>
+			<ul id="your-room-table" class="animated"></ul>
+		</div>
+	</div>
+
+	<script src="/socket.io/socket.io.js?x18050"></script>
+	<script
+		  src="https://code.jquery.com/jquery-3.3.1.min.js"
+		  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+		  crossorigin="anonymous">
+	</script>
+	<script src="/lobby.js"></script>
+</body>
+</html>
