@@ -1,39 +1,43 @@
 var importDeck = {
-        '0blue': { str:0, color:'blue', endTurn: true},
-        '1blue': { str:1, color:'blue', endTurn: true},
-        '2blue': { str:2, color:'blue', endTurn: true},
-        '3blue': { str:3, color:'blue', endTurn: true},
-        '4blue': { str:4, color:'blue', endTurn: true},
-        '5blue': { str:5, color:'blue', endTurn: true},
-        '6blue': { str:6, color:'blue', endTurn: true},
-        '7blue': { str:7, color:'blue', endTurn: true},
-        '0pink': { str:0, color:'pink', endTurn: true},
-        '1pink': { str:1, color:'pink', endTurn: true},
-        '2pink': { str:2, color:'pink', endTurn: true},
-        '3pink': { str:3, color:'pink', endTurn: true},
-        '4pink': { str:4, color:'pink', endTurn: true},
-        '5pink': { str:5, color:'pink', endTurn: true},
-        '6pink': { str:6, color:'pink', endTurn: true},
-        '7pink': { str:7, color:'pink', endTurn: true},
-        // '0green': { str:0, color:'green', endTurn: true},
-        // '1green': { str:1, color:'green', endTurn: true},
-        // '2green': { str:2, color:'green', endTurn: true},
-        // '3green': { str:3, color:'green', endTurn: true},
-        // '4green': { str:4, color:'green', endTurn: true},
-        // '5green': { str:5, color:'green', endTurn: true},
-        // '6green': { str:6, color:'green', endTurn: true},
-        // '7green': { str:7, color:'green', endTurn: true},
-        // '0yellow': { str:0, color:'yellow', endTurn: true},
-        // '1yellow': { str:1, color:'yellow', endTurn: true},
-        // '2yellow': { str:2, color:'yellow', endTurn: true},
-        // '3yellow': { str:3, color:'yellow', endTurn: true},
-        // '4yellow': { str:4, color:'yellow', endTurn: true},
-        // '5yellow': { str:5, color:'yellow', endTurn: true},
-        // '6yellow': { str:6, color:'yellow', endTurn: true},
-        // '7yellow': { str:7, color:'yellow', endTurn: true},
+        '0blue': { title:0, color:'blue', endTurn: true},
+        '1blue': { title:1, color:'blue', endTurn: true},
+        '2blue': { title:2, color:'blue', endTurn: true},
+        '3blue': { title:3, color:'blue', endTurn: true},
+        '4blue': { title:4, color:'blue', endTurn: true},
+        '5blue': { title:5, color:'blue', endTurn: true},
+        '6blue': { title:6, color:'blue', endTurn: true},
+        '7blue': { title:7, color:'blue', endTurn: true},
+        '0pink': { title:0, color:'pink', endTurn: true},
+        '1pink': { title:1, color:'pink', endTurn: true},
+        '2pink': { title:2, color:'pink', endTurn: true},
+        '3pink': { title:3, color:'pink', endTurn: true},
+        '4pink': { title:4, color:'pink', endTurn: true},
+        '5pink': { title:5, color:'pink', endTurn: true},
+        '6pink': { title:6, color:'pink', endTurn: true},
+        '7pink': { title:7, color:'pink', endTurn: true},
+        // '0green': { title:0, color:'green', endTurn: true},
+        // '1green': { title:1, color:'green', endTurn: true},
+        // '2green': { title:2, color:'green', endTurn: true},
+        // '3green': { title:3, color:'green', endTurn: true},
+        // '4green': { title:4, color:'green', endTurn: true},
+        // '5green': { title:5, color:'green', endTurn: true},
+        // '6green': { title:6, color:'green', endTurn: true},
+        // '7green': { title:7, color:'green', endTurn: true},
+        // '0yellow': { title:0, color:'yellow', endTurn: true},
+        // '1yellow': { title:1, color:'yellow', endTurn: true},
+        // '2yellow': { title:2, color:'yellow', endTurn: true},
+        // '3yellow': { title:3, color:'yellow', endTurn: true},
+        // '4yellow': { title:4, color:'yellow', endTurn: true},
+        // '5yellow': { title:5, color:'yellow', endTurn: true},
+        // '6yellow': { title:6, color:'yellow', endTurn: true},
+        // '7yellow': { title:7, color:'yellow', endTurn: true},
+        '+3blue': { title: '+3', color:'blue', action: '+3', caption: 'Противник берёт 3 карты'},
+        '+3pink': { title: '+3', color:'pink', action: '+3', caption: 'Противник берёт 3 карты'},
+        '+3green': { title: '+3', color:'green', action: '+3', caption: 'Противник берёт 3 карты'},
+        '+3yellow': { title: '+3', color:'yellow', action: '+3', caption: 'Противник берёт 3 карты'}
     }
 
-var GAME = {
+GAME = {
     hendLimit: 5,
     importDeck: importDeck,
     baseDeck: Object.keys(importDeck),
@@ -49,7 +53,6 @@ var GAME = {
          }
          return this;
         };
-
         cards.shuffle() // перемешиваем колоду
     },
     getCard: function(game, playerID, quant){
@@ -58,28 +61,30 @@ var GAME = {
             game.players_data[playerID].push(els[i])
         }
     },
-    startGame: function(n, deck) { // обрабатываем все id игроков
+    startGame: function(n) { // обрабатываем все id игроков
 
-        function Data(n){ // объект данных для передачи
-            this.deck = deck, // загружаем id карт
+        var Data = function(n){ // объект данных для передачи
+            this.gameID = k,
+            this.deck = Object.keys(importDeck), // загружаем id карт
             this.kon = [], // массив карт на кону
             this.players_data = {}, // объект данных игроков
-            this.query = n[0] // очерёдность хода, берём первого игрока (хост)
+            this.query = n[0], // очерёдность хода, берём первого игрока (хост)
+            this.rulls = 'base',
+            this.miniGameIndex = 0
         }
         var data = new Data(n);
 
         this.deckShuffle(data.deck); // перемешиваем карты
 
         for(var i = 0; i < n.length; i++){ // раздаём карты игрокам согласно лимиту
-            els = data['deck'].splice(1, this.hendLimit);
+            var els = data['deck'].splice(1, this.hendLimit);
             var k = n[i];
             data.players_data[k] = els;
         }
 
-        // карта на кон
-        el = data['deck'].pop();
-        data['deck'].splice(1,1);
-        data['kon'].push(el);
+        // карта на кон( не содержащая action )
+        var el = data['deck'].findIndex(function(element, index){ if('action' in importDeck[element]){ return false } else { return true }})
+        data['kon'].push(data['deck'].splice(el,1));
 
         return data;
 
@@ -91,6 +96,12 @@ var GAME = {
        }
        this.deckShuffle(game.deck)
        return game;
+    },
+    removeCardsToDisconnect: function(game, playerID){
+        game['deck'].push(game.players_data[playerID]);
+        this.deckShuffle(game.deck)
+
+        return game;
     },
     endGame: function() {}
 }

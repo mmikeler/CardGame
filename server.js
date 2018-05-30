@@ -7,9 +7,9 @@ var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
 
-var gameVersion = 'Версия игры: 1.0.0 alpha'
+var gameVersion = 'Версия игры: 1.0.1 alpha'
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 5000;
 app.set('port', port);
 app.use('/', express.static(__dirname + '/game'));
 
@@ -24,10 +24,10 @@ server.listen(port, function() {
 });
 
 var GAME = require ('./models/manch');
-var importDeck = GAME.importDeck
+var importDeck = GAME.importDeck;
 
 // ==========================================================
-var room_limit = 4; // минимальное кол-во игроков в комнате
+var room_min_limit = 3; // минимальное кол-во игроков в комнате
 
 var players = {} // объект игроков
 var free = {} // игроки в поиске
@@ -71,6 +71,7 @@ io.on('connection', function(socket, name) {
 							for(player in players_data){ // удаляем отключенного игрока
 								if(players_data[player] == id){ delete players_data[player] }
 							}
+							removeCardsToDisconnect(game_data, id);
 						}
 						// если все проивники отключились, отправляем сообщение с маркером выхода в лобби
 						else {
@@ -95,14 +96,13 @@ io.on('connection', function(socket, name) {
 					host: id,
 					status: 'open',
 					team: [id],
-					room_limit: room_limit,
+					room_limit: room_min_limit,
 					game: {}
 				};
 				//server.listen(5000, function() {console.log(game_rooms[id]);});
 				socket.join(id);
 				player.room = id;
 				socket.emit('room-up');
-				socket.emit('importDeck', importDeck);
 			}
 		})
 		
@@ -131,7 +131,6 @@ io.on('connection', function(socket, name) {
 					player.name = data;
 					player.room = key;
 					socket.emit('room-join');
-					socket.emit('importDeck', importDeck);
 					//server.listen(5000, function() {console.log(game_rooms[key]);});
 				}
 			} else { socket.emit('no-rooms') }
@@ -152,15 +151,16 @@ io.on('connection', function(socket, name) {
 		socket.on('start-game', function(){
 			if('team' in game_rooms[id] && game_rooms[id].team !== undefined){
 				var n = game_rooms[id].team; // участники
-				var deck = Object.keys(importDeck);
-				game_rooms[id].game = GAME.startGame(n, deck);
+				game_rooms[id].game = GAME.startGame(n, id);
 				var game_data = game_rooms[id].game;
 				game_rooms[id].status = 'close';
 				
-				io.sockets.to(id).emit('game-data', game_data);
-				// server.listen(5000, function() { console.log(game_data) });
+				// обновляем данные у игроков
+				updateGameData(id, game_data);
+				// переходим на доску
 				io.sockets.to(id).emit('goToBord');
 			}
+			else { gameMessage(id, 'Ошибка', null); }
 		})
 
 		// ход =============================================================================
@@ -170,75 +170,62 @@ io.on('connection', function(socket, name) {
 				var game_data = game_rooms[room_id].game; // получаем данные игры
 				var cardTo = importDeck[card_id]; // смотрим свойства сыгранной карты
 				var cardOn = importDeck[game_data.kon[game_data['kon'].length - 1]]; // смотрим свойства карты на кону
-				var endTurn = cardTo.endTurn;
 				if(game_data.query == id){ // если сейчас ход игрока сыгравшего карту
-					if(cardTo.color == cardOn.color || cardTo.str == cardOn.str){ // если совпадает цвет или сила карт
-						game_data['kon'].push(card_id); // добавляем карту на кон
-						for(var i=0; i < game_data.players_data[id].length; i++){ // убираем карту у игрока
-							var k = game_data.players_data[id][i];
-							if(card_id === k){ game_data.players_data[id].splice(i,1); }
-						}
-						// если это последняя карта игрока - заканчиваем игру
-						if(game_data.players_data[id].length == 0) {
-							var mess = {
-								message: 'Победитель ' + player.name,
-								marker: 'exit'
+					// если на кону карта с action и мини-игра активна
+					if('action' in cardOn && game_data.rulls != 'base') {
+						// отрабатываем конкретный action
+						if(cardOn.action == '+3'){
+							// если экшен такой же
+							if(cardTo.action == cardOn.action){
+
+								// перемещение карты на кон и проверка на конец игры
+								cardToKon(game_data, card_id, id);
+
+								// передаём ход
+								nextPlayerTurn(game_data, room_id, id);
 							}
-							io.sockets.to(room_id).emit('popMessage', mess);
-							game_data.query = false;					
+							else { gameMessage(room_id, 'Kарта не подходит', null) }
 						}
-						// если не последняя карта, передаём ход следующему по списку игроку
-						else {
-							var ind = game_rooms[room_id]['team'].findIndex(function(element, index){ if(element == id){ return true; } })
-							if(ind == game_rooms[room_id]['team'].length -1 ) {
-								game_data.query = game_rooms[room_id]['team'][0];
-							}
-							else { 
-								game_data.query = game_rooms[room_id]['team'][ind + 1]
-							}
-							// снимаем маркер на добровольный добор
-							players[id].freeCards = false;
-						}
+						else { gameMessage(room_id, 'Kарта не подходит', null) }
+
+						// обновляем данные у игроков
+						updateGameData(room_id, game_data);
 					}
-					// если карта не подходит
-					else { socket.emit('gameMessage', 'карта не подходит') }
+					// если совпадает цвет или сила карт
+					else {
+						if(cardTo.color == cardOn.color || cardTo.title == cardOn.title){
+							// перемещение карты на кон и проверка на конец игры
+							cardToKon(game_data, card_id, id);
+							// передаём ход
+							nextPlayerTurn(game_data, room_id, id);
+						}
+						else { gameMessage(room_id, 'Kарта не подходит', null) }
+					}
 				}
 				// обновляем данные у игроков
-				io.sockets.to(room_id).emit('game-data', game_data);
+				updateGameData(room_id, game_data);
 			}
 		})
 
 		// добровольный добор карт
 		socket.on('get-card', function(data) {
-			if(data.marker == 'free'){
-				if(players[id].freeCards == false){
-					if('room' in players[id] && players[id].room !== null){
-						var room_id = players[id].room; // находим id комнаты
-						var game_data = game_rooms[room_id].game; // получаем данные игры
-						if(game_data.query == id){ // если сейчас ход игрока сыгравшего карту
-							var els = game_data.deck.splice(0, data.quant) // берём карты
-					        for(var i=0; i < els.length; i++){
-					            game_data.players_data[id].push(els[i])
-					        }
-					        // ставим маркер, что добровольный добор был
-					        players[id].freeCards = true;
-						}
-					}
-				}
-				else { socket.emit('gameMessage', 'больше нельзя брать из колоды') }
-			}
-		// принудительный добор
-			else {
+			if(players[id].freeCards == false){
 				if('room' in players[id] && players[id].room !== null){
 					var room_id = players[id].room; // находим id комнаты
 					var game_data = game_rooms[room_id].game; // получаем данные игры
-					var els = game_data.deck.splice(0, data.quant) // берём карты
-			        for(var i=0; i < els.length; i++){
-			            game_data.players_data[id].push(els[i])
-			        }
+					if(game_data.query == id){ // если сейчас ход игрока сыгравшего карту
+						var els = game_data['deck'].splice(0, data.quant) // берём карты
+				        for(var i=0; i < els.length; i++){
+				            game_data.players_data[id].push(els[i])
+				        }
+				        // ставим маркер, что добровольный добор был
+				        players[id].freeCards = true;
+					}
 				}
 			}
-			io.sockets.to(room_id).emit('game-data', game_data);
+			else { gameMessage(room_id, 'Больше нельзя брать из колоды', null) }
+			// обновляем данные игроков
+			updateGameData(room_id, game_data);
 		})
 
 		// когда дека пустая, обновляем
@@ -246,20 +233,22 @@ io.on('connection', function(socket, name) {
 			if('room' in players[id] && players[id].room !== null){
 				var room_id = players[id].room; // находим id комнаты
 				var game_data = game_rooms[room_id].game; // получаем данные игры
-				game_data = GAME.newDeck(game_data);
-				// обновляем данные в игре
-				io.sockets.to(room_id).emit('game-data', game_data);
+				if(game_data['deck'].length == 0){
+					game_data = GAME.newDeck(game_data);
+					// обновляем данные в игре
+					updateGameData(room_id, game_data);
+				}
 			}
 		})
 
 		// добровольная передача хода
 		socket.on('next-player', function(){
-			//server.listen(5000, function() {console.log(players);});
 			if('room' in players[id] && players[id].room !== null){
 				var room_id = players[id].room; // находим id комнаты
 				var game_data = game_rooms[room_id].game; // получаем данные игры
-					if(game_data.query == id) {
-						if(players[id].freeCards == true){
+				if(game_data.query == id) {
+					if(game_data.rulls == 'base'){
+						if(players[id].freeCards === true){
 							var ind = game_rooms[room_id]['team'].findIndex(function(element, index){ if(element == id){ return true; } })
 							if(ind == game_rooms[room_id]['team'].length - 1 ) {
 								game_data.query = game_rooms[room_id]['team'][0];
@@ -268,34 +257,103 @@ io.on('connection', function(socket, name) {
 								game_data.query = game_rooms[room_id]['team'][ind + 1]
 							}
 						}
-						else { socket.emit('gameMessage', 'возьмите карту') }
-						// снимаем маркер на добровольный добор
-						players[id].freeCards = false;
+						else {
+							gameMessage(room_id, 'Сыграйте или возьмите карту для передачи хода', null)
+						}
 					}
-					io.sockets.to(room_id).emit('game-data', game_data);
+					else {
+						if(game_data.rulls == '+3'){
+							// игрок получает карты согласно индексу
+							var els = game_data['deck'].splice(0, game_data.miniGameIndex)
+					        for(var i=0; i < els.length; i++){
+					            game_data.players_data[id].push(els[i])
+					        }
+					        // передаём ход
+					        nextPlayerTurn(game_data, room_id, id);
+					        // снимаем статус мини-игры
+					        game_data.rulls = 'base';
+					        // и обнуляем индекс
+					        game_data.miniGameIndex = 0;
+						}
+					}
+					// снимаем маркер на добровольный добор
+						players[id].freeCards = false;
+				}
+				updateGameData(room_id, game_data);
 			}
 			else { 
-				var mess = { message: 'игра потеряна', marker: 'exit' }
+				var mess = { message: 'Игра потеряна', marker: 'exit' }
 				socket.emit('popMessage', mess)
 			}
 		})
-
-		// возврат в лобби
-		socket.on('exit', function(){})
 
 }); // end socket - connection
 
 // передаём данные в лобби
 state = { gameVersion,players,free,game_rooms }
-
 setInterval(function() {
   io.sockets.emit('state', state);
   //server.listen(5000, function() {console.log(game_rooms);});
-}, 1000 / 5);
+}, 1000 / 3);
 
 // функция удаления пустых комнат
 function clearRooms(){
 	for(room in game_rooms){
 		if(game_rooms[room]['team'].length < 1){ delete game_rooms[room] }
 	}
+}
+
+// обновление данных в игре
+function updateGameData(room_id, game_data){
+	io.sockets.to(room_id).emit('game-data', game_data);
+}
+
+// отправка игровых сообщений
+function gameMessage(room, text, marker){
+	var mess = {
+		message: text,
+		marker: marker
+	}
+	io.sockets.to(room).emit('gameMessage', mess);
+}
+
+// перемещаем карту от игрока на кон
+function cardToKon(game_data, card_id, id){
+	// добавляем сыгранную карту на кон
+		game_data['kon'].push(card_id);
+
+	// убираем карту у игрока
+	for(var i=0; i < game_data.players_data[id].length; i++){
+		var k = game_data.players_data[id][i];
+		if(card_id === k){ game_data.players_data[id].splice(i,1); }
+	}
+	// если эта карта у игрока последняя - он победил
+	if(game_data.players_data[id].length == 0) {
+		var mess = {
+			message: 'Победитель ' + players[id].name,
+			marker: 'exit'
+		}
+		io.sockets.to(players[id].room).emit('popMessage', mess);
+		game_data.query = false;					
+	}
+	// если у новой карты есть мини-игра, добавлем её индекс и игру
+	if('action' in importDeck[card_id]){
+		game_data.rulls = importDeck[card_id].action;
+		if(importDeck[card_id].action == '+3'){ game_data.miniGameIndex = game_data.miniGameIndex + 3 }
+	}
+	else { game_data.rulls = 'base' }
+}
+
+// передача хода
+function nextPlayerTurn(game_data, room_id, id){
+	var ind = game_rooms[room_id]['team'].findIndex(function(element, index){ if(element == id){ return true; } })
+	if( ind == game_rooms[room_id]['team'].length - 1 ) {
+		game_data.query = game_rooms[room_id]['team'][0];
+	}
+	else { 
+		game_data.query = game_rooms[room_id]['team'][ind + 1]
+	}
+	// снимаем маркер на добровольный добор
+	players[id].freeCards = false;
+	
 }

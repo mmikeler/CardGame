@@ -1,5 +1,42 @@
 var socket = io();
-var importDeck = {};
+var importDeck = {
+        '0blue': { title:0, color:'blue', endTurn: true},
+        '1blue': { title:1, color:'blue', endTurn: true},
+        '2blue': { title:2, color:'blue', endTurn: true},
+        '3blue': { title:3, color:'blue', endTurn: true},
+        '4blue': { title:4, color:'blue', endTurn: true},
+        '5blue': { title:5, color:'blue', endTurn: true},
+        '6blue': { title:6, color:'blue', endTurn: true},
+        '7blue': { title:7, color:'blue', endTurn: true},
+        '0pink': { title:0, color:'pink', endTurn: true},
+        '1pink': { title:1, color:'pink', endTurn: true},
+        '2pink': { title:2, color:'pink', endTurn: true},
+        '3pink': { title:3, color:'pink', endTurn: true},
+        '4pink': { title:4, color:'pink', endTurn: true},
+        '5pink': { title:5, color:'pink', endTurn: true},
+        '6pink': { title:6, color:'pink', endTurn: true},
+        '7pink': { title:7, color:'pink', endTurn: true},
+        '0green': { title:0, color:'green', endTurn: true},
+        '1green': { title:1, color:'green', endTurn: true},
+        '2green': { title:2, color:'green', endTurn: true},
+        '3green': { title:3, color:'green', endTurn: true},
+        '4green': { title:4, color:'green', endTurn: true},
+        '5green': { title:5, color:'green', endTurn: true},
+        '6green': { title:6, color:'green', endTurn: true},
+        '7green': { title:7, color:'green', endTurn: true},
+        '0yellow': { title:0, color:'yellow', endTurn: true},
+        '1yellow': { title:1, color:'yellow', endTurn: true},
+        '2yellow': { title:2, color:'yellow', endTurn: true},
+        '3yellow': { title:3, color:'yellow', endTurn: true},
+        '4yellow': { title:4, color:'yellow', endTurn: true},
+        '5yellow': { title:5, color:'yellow', endTurn: true},
+        '6yellow': { title:6, color:'yellow', endTurn: true},
+        '7yellow': { title:7, color:'yellow', endTurn: true},
+        '+3blue': { title: '+3', color:'blue', action: '+3', caption: 'Противник берёт 3 карты'},
+        '+3pink': { title: '+3', color:'pink', action: '+3', caption: 'Противник берёт 3 карты'},
+        '+3green': { title: '+3', color:'green', action: '+3', caption: 'Противник берёт 3 карты'},
+        '+3yellow': { title: '+3', color:'yellow', action: '+3', caption: 'Противник берёт 3 карты'}
+    }
 var state;
 
 // общие данные для лобби
@@ -42,14 +79,15 @@ socket.on('state', function(data){
 })
 
 // опциональные запросы =========================
-socket.on('importDeck', function(data){ importDeck = data }); // загружаем карты и их данные 
+//socket.on('importDeck', function(data){ importDeck = data }); // загружаем карты и их данные 
 socket.on('no-rooms', function(){ alert('нет комнат') }); // нет свободных комнат
 socket.on('rooms-full', function(data){ alert(data) }); // нельзя присоединится к комнате. заполнена.
 
 // игровые сообщения ============================
 function inGameTip(text) {
-	$('#bord .content').append('<div id="mainTip" class="inGameTip">'+ text +'</div>');
-	$('#mainTip').fadeIn(500).fadeOut(3000, function(){ $(this).remove() });
+	$('#mainTip .tipContent').html('<span>!</span>' + text);
+	$('#mainTip').removeClass('bounceOutLeft').show(0).addClass('bounceInLeft');
+	setTimeout(function(){$('#mainTip').removeClass('bounceInLeft').addClass('bounceOutLeft').delay(1000).hide(0)}, 3000);
 }
 function popTip(data) {
 	$('#popTip span').text(data.message);
@@ -58,8 +96,8 @@ function popTip(data) {
 }
 
 socket.on('popMessage', function(data){ popTip(data) }); // сообщение для игрока в popUp
-socket.on('gameMessage', function(data){ inGameTip(data) }); // сообщения для игрока в логах
-socket.on('player-disconnect', function(id){ console.log(state.players[id].name + ' отключился') })
+socket.on('gameMessage', function(data){ inGameTip(data.message) }); // сообщения для игрока в логах
+socket.on('player-disconnect', function(id){ inGameTip(state.players[id].name + ' отключился') })
 
 // кнопка создания комнаты =========================
 $('#create-game').on('click', function(){ // открытие комнаты игроком для других игроков
@@ -103,9 +141,9 @@ socket.on('goToBord', function(){
 })
 // создаём поле и карты
 socket.on('game-data', function(game){
-	console.log(game);
+	//console.log(game.rulls, game.miniGameIndex, game);
 	// если дека пустая
-	if(game['deck'].length == 0){ socket.emit('new-deck') };
+	if(game['deck'].length == 0 && game['kon'].length > 1){ socket.emit('new-deck') };
 	// далее
 	var kon = game.kon;
 	var players = game.players_data;
@@ -113,7 +151,8 @@ socket.on('game-data', function(game){
 	var col_class = 'col-' + opp_count;
 
 	$('#deck').text(Object.keys(game.deck).length);
-	$('#kon').html('<div class="card '+ importDeck[kon[kon.length - 1]].color +'">'+ importDeck[kon[kon.length - 1]].str +'</div>');
+	if('caption' in importDeck[kon[kon.length - 1]]){ var tooltip = 'data-tooltip="'+ importDeck[kon[kon.length - 1]].caption +'"' } else { tooltip = null }
+	$('#kon').html('<div class="card '+ importDeck[kon[kon.length - 1]].color +'"'+ tooltip + '>' + importDeck[kon[kon.length - 1]].title +'</div>');
 
 	var opp = 2; // идентификатор блока для оппонентов
 	$('#opponents').html('');
@@ -123,7 +162,8 @@ socket.on('game-data', function(game){
 			$('#player_1 .cards-container').html('');
 			for(var l=0; l < players[player].length; l++) {
 				var card_id = players[player][l]
-				$('#player_1 .cards-container').append('<div class="card '+ importDeck[card_id].color +'" data-id="'+ card_id +'">'+ importDeck[card_id].str +'</div>');
+				if('caption' in importDeck[card_id]){ var tooltip = 'data-tooltip="'+ importDeck[card_id].caption +'"' } else { tooltip = null }
+				$('#player_1 .cards-container').append('<div class="card '+ importDeck[card_id].color +'" data-id="'+ card_id +'"'+ tooltip +'>'+ importDeck[card_id].title +'</div>');
 			}
 			if(player === game.query){ $('#player_1 .turn-mark').addClass('bounce active') } else { $('#player_1 .turn-mark').removeClass('bounce active') }
 		} else {
@@ -145,9 +185,9 @@ $('#player_1').on('click','.card', function() {
 	socket.emit('turn', card_id);
 })
 
-// взять карту(ы)
+// взять карту
 $('#deck').on('click', function(){
-	var data = { quant: 1, marker: 'free' }
+	var data = { quant: 1 }
 	socket.emit('get-card', data);
 	//console.log('добор сделан');
 })
