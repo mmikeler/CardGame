@@ -92,16 +92,16 @@ io.on('connection', function(socket, name) {
 		socket.on('create-game', function(){ // открытие комнаты - игры
 			if(player.status == 'online') {
 				player.status = 'server';
-				game_rooms[id] = {
+				game_rooms[id + 'room'] = {
 					host: id,
 					status: 'open',
 					team: [id],
 					room_limit: room_min_limit,
 					game: {}
 				};
-				//server.listen(5000, function() {console.log(game_rooms[id]);});
-				socket.join(id);
-				player.room = id;
+				//server.listen(5000, function() {console.log(game_rooms[id + 'room']);});
+				socket.join(id + 'room');
+				player.room = id + 'room';
 				socket.emit('room-up');
 			}
 		})
@@ -149,16 +149,16 @@ io.on('connection', function(socket, name) {
 
 		// start game ======================================================================
 		socket.on('start-game', function(){
-			if('team' in game_rooms[id] && game_rooms[id].team !== undefined){
-				var n = game_rooms[id].team; // участники
-				game_rooms[id].game = GAME.startGame(n, id);
-				var game_data = game_rooms[id].game;
-				game_rooms[id].status = 'close';
+			if('team' in game_rooms[id + 'room'] && game_rooms[id + 'room'].team !== undefined){
+				var n = game_rooms[id + 'room'].team; // участники
+				game_rooms[id + 'room'].game = GAME.startGame(n, id);
+				var game_data = game_rooms[id + 'room'].game;
+				game_rooms[id + 'room'].status = 'close';
 				
 				// обновляем данные у игроков
 				updateGameData(id, game_data);
 				// переходим на доску
-				io.sockets.to(id).emit('goToBord');
+				io.sockets.to(id + 'room').emit('goToBord');
 			}
 			else { gameMessage(id, 'Ошибка', null); }
 		})
@@ -184,9 +184,9 @@ io.on('connection', function(socket, name) {
 								// передаём ход
 								nextPlayerTurn(game_data, room_id, id);
 							}
-							else { gameMessage(room_id, 'Kарта не подходит', null) }
+							else { gameMessage(id, 'Kарта не подходит', null) }
 						}
-						else { gameMessage(room_id, 'Kарта не подходит', null) }
+						else { gameMessage(id, 'Kарта не подходит', null) }
 
 						// обновляем данные у игроков
 						updateGameData(room_id, game_data);
@@ -199,7 +199,7 @@ io.on('connection', function(socket, name) {
 							// передаём ход
 							nextPlayerTurn(game_data, room_id, id);
 						}
-						else { gameMessage(room_id, 'Kарта не подходит', null) }
+						else { gameMessage(id, 'Kарта не подходит', null) }
 					}
 				}
 				// обновляем данные у игроков
@@ -223,7 +223,7 @@ io.on('connection', function(socket, name) {
 					}
 				}
 			}
-			else { gameMessage(room_id, 'Больше нельзя брать из колоды', null) }
+			else { gameMessage(id, 'Больше нельзя брать из колоды', null) }
 			// обновляем данные игроков
 			updateGameData(room_id, game_data);
 		})
@@ -258,7 +258,7 @@ io.on('connection', function(socket, name) {
 							}
 						}
 						else {
-							gameMessage(room_id, 'Сыграйте или возьмите карту для передачи хода', null)
+							gameMessage(id, 'Сыграйте или возьмите карту для передачи хода', null)
 						}
 					}
 					else {
@@ -309,12 +309,12 @@ function updateGameData(room_id, game_data){
 }
 
 // отправка игровых сообщений
-function gameMessage(room, text, marker){
+function gameMessage(socketid, text, marker){
 	var mess = {
 		message: text,
 		marker: marker
 	}
-	io.sockets.to(room).emit('gameMessage', mess);
+	io.to(socketid).emit('gameMessage', mess);
 }
 
 // перемещаем карту от игрока на кон

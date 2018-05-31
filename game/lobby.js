@@ -61,7 +61,6 @@ socket.on('state', function(data){
 			var l = data.players[socket.id].room;
 			var s = data.game_rooms[l];
 			
-			$('#room-title').text(s.room_name);
 			if( s['team'].length > 1 && data.players[socket.id].status == 'server'){ $('#start-game').show() }
 			else { $('#start-game').hide();}
 
@@ -165,17 +164,18 @@ socket.on('game-data', function(game){
 				if('caption' in importDeck[card_id]){ var tooltip = 'data-tooltip="'+ importDeck[card_id].caption +'"' } else { tooltip = null }
 				$('#player_1 .cards-container').append('<div class="card '+ importDeck[card_id].color +'" data-id="'+ card_id +'"'+ tooltip +'>'+ importDeck[card_id].title +'</div>');
 			}
-			if(player === game.query){ $('#player_1 .turn-mark').addClass('bounce active') } else { $('#player_1 .turn-mark').removeClass('bounce active') }
+			if(player === game.query){ $('#player_1 .turn-mark').addClass('pulse') } else { $('#player_1 .turn-mark').removeClass('pulse') }
 		} else {
 			//console.log(players[player]);
 			$('#opponents').append('<div id="player_' + opp + '" class="animated opp-zone '+ col_class +'"><img src="img/avatar/'+ state.players[player].avatar +'.gif" class="avatar"><p>'+ state.players[player].name +'</p></div>');
 			for(var i=0; i < players[player].length; i++){
 				$('#opponents #player_'+ opp).append('<div class="opp-card"></div>');
 			}
-			if(player === game.query){ $('#player_'+ opp).addClass('bounce active') } else { $('#player_'+ opp).removeClass('bounce active') }
+			if(player === game.query){ $('#player_'+ opp).addClass('pulse-border') } else { $('#player_'+ opp).removeClass('pulse-border') }
 			opp++;
 		}
 	}
+	cardsAlign();
 })
 
 // ход
@@ -204,3 +204,28 @@ $('#exit').on('click', function(){
 	$('#lobby').removeClass('behind');
 	$('#popTip').fadeOut(500);
 })
+
+// выравнивание карт
+function cardsAlign() {
+	var k = 0;
+	var elts = $('#player_1 .cards-container .card');
+	var elt = $('#player_1 .cards-container .card').width();
+	var w = $('#player_1 .cards-container').width();
+	var ind = w / elts.length;
+	var cor = $('#player_1 .cards-container .card').width() - ind;
+	if(w < elt*elts.length){
+	  $('#player_1 .cards-container .card').each(function(){
+	    var el = 'left:'+(k)+'px'
+	    $(this).attr('style', el);
+	    k = Math.floor(k + ind - cor / elts.length);
+	  })
+	}
+	else {
+		k = Math.floor(w - (elt*elts.length + 20*(elts.length - 1))) / 2;
+		$('#player_1 .cards-container .card').each(function(){
+	    var el = 'left:'+(k)+'px'
+	    $(this).attr('style', el);
+	    k = (k + elt + 20);
+	  })
+	}
+}

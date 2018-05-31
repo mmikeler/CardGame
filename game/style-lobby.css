@@ -107,29 +107,36 @@ table {
 #deck, #stock {
 	top: 35%;
     left: 0;
-    height: 190px;
-    width: 135px;
+    height: 200px;
+    width: 150px;
     padding: 0;
-    background: #962f2f;
+    background: #9a2929;
     border: 2px solid #333;
-    font-size: 55px;
+    font-size: 90px;
+    color: #671b1b;
     text-align: center;
-    text-shadow: 0 0 3px #fff;
-    line-height: 3.5;
+    /* text-shadow: 0 0 3px #fff; */
+    line-height: 2.3;
     transform: rotate(330deg);
 }
 #deck, .turn-mark { cursor: pointer; }
 
 #player_1 {
 	bottom: 15px;
-    left: 5%;
-    width: 90%;
-    height: 200px;
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    padding: 0;
+}
+.person {
+	width: 20%;
 }
 .cards-container {
-	display: flex;
-    justify-content: center;
-    padding-right: 100px;
+	width: 65%;
+    position: relative;
 }
 #opponents {
 	width: 90%;
@@ -188,21 +195,11 @@ table {
 	width: 25px;
     height: 40px;
 }
-.turn-mark {
-	position: absolute;
-    bottom: 130px;
-    right: 20px;
-    background: gray;
-    border: 2px solid #555;
-    height: 50px;
-    width: 50px;
-    border-radius: 50%;
-}
-.turn-mark.active {
-	background: #10c316;
-	border-color: #fff;
-	animation: eye 3s ease-in-out infinite;
-    -webkit-animation: eye 3s ease-in-out infinite;
+.buttons {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 15%;
 }
 
 .more {
@@ -220,21 +217,7 @@ table {
     width: 200px;
 }
 #kon .card {
-	margin: auto;
-    display: block;
-    width: 135px;
-    height: 190px;
-    padding: 0;
-    font-size: 75px;
-    position: absolute;
-    left: calc(50% - 60px);
-    line-height: 2.4;
     cursor: default;
-}
-
-#stock {
-	left: auto;
-	right: 15px;
 }
 
 .game_zone {
@@ -244,22 +227,23 @@ table {
 }
 
 .card {
-	width: 65px;
-    height: 85px;
+	position: absolute;
+    width: 150px;
+    height: 180px;
     background: #ccc;
     text-align: center;
-    font-size: 45px;
+    font-size: 100px;
     margin: 10px;
     color: #fff;
     text-shadow: 1px 1px 1px #333;
     border-radius: 5px;
     padding-top: 20px;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.5;
     cursor: pointer;
     transition: all .3s;
 }
-.card:hover { margin-top: 0; }
+.card:hover { margin-top: 0; z-index: 100}
 
 #deck, .card, .opp-zone {
 	box-shadow: 3px 3px 20px #333;
@@ -323,7 +307,7 @@ table {
 }
 
 [data-tooltip] {
-    position: relative; /* Относительное позиционирование */ 
+    position: absolute; /* Относительное позиционирование */ 
    }
    [data-tooltip]::after {
     content: attr(data-tooltip);
@@ -356,13 +340,82 @@ table {
 	display: block;
 }
 
-@keyframes eye {
-    0% { box-shadow: 0 0 10px #fff }   
-    50% { box-shadow: 0 0 50px #fff }
-    100% { box-shadow: 0 0 10px #fff }
+.pulse {
+  width: 40px;
+  height: 40px;
+  background: #74b533;
+  border-radius: 100%;
+  opacity: 1;
+  position: relative;
+  padding-right: 4px;
+  padding-bottom: 4px;
 }
-@-webkit-keyframes eye {
-	0% { box-shadow: 0 0 10px #fff }   
-    50% { box-shadow: 0 0 50px #fff }
-    100% { box-shadow: 0 0 10px #fff }
+.pulse:after {
+  position: absolute;
+  content: '';
+  width: inherit;
+  height: inherit;
+  border: 2px solid #74b533;
+  background: transparent;
+  border-radius: 100%;
+  opacity: .75;
+  display: block;
+  animation: pulsar 3s infinite ease-in-out;
+}
+.pulse:before {
+  position: absolute;
+  content: '';
+  width: inherit;
+  height: inherit;
+  border: 2px solid #74b533;
+  background: transparent;
+  border-radius: 100%;
+  opacity: .5;
+  display: block;
+  animation: pulsar 3s infinite ease-in-out;
+  animation-delay: 2s;
+}
+
+.pulse-border {
+  position: relative;
+  padding-right: 4px;
+  padding-bottom: 4px;
+}
+.pulse-border:after {
+  position: absolute;
+    content: '';
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    top: 0px;
+    left: 0px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: inherit;
+    opacity: .75;
+    display: block;
+    animation: pulse-border 2s infinite ease-in-out;
+}
+.pulse-border:before {
+  position: absolute;
+    content: '';
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    top: 0px;
+    left: 0px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: inherit;
+    opacity: .5;
+    display: block;
+    animation: pulse-border 2s infinite ease-in-out;
+  animation-delay: 1s;
+}
+
+@keyframes pulsar {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes pulse-border {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.15); opacity: 0; }
 }
